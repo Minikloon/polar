@@ -1,7 +1,7 @@
 package net.hollowcube.polar.demo;
 
-import net.hollowcube.polar.PolarLoader;
-import net.hollowcube.polar.PolarWorld;
+import net.hollowcube.polar.minestom.FilePolarChunkLoader;
+import net.hollowcube.polar.model.PolarWorld;
 import net.hollowcube.polar.PolarWriter;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
@@ -12,7 +12,6 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.LightingChunk;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +34,7 @@ public class DemoServer {
 //        instance.setChunkSupplier(LightingChunk::new);
 //        instance.setChunkLoader(new PolarLoader(Path.of("./src/test/resources/hcspawn.polar")));
         // Lit
-        instance.setChunkLoader(new PolarLoader(Path.of("./hcspawn.polar")));
+        instance.setChunkLoader(new FilePolarChunkLoader(Path.of("./hcspawn.polar")));
 
 
         MinecraftServer.getGlobalEventHandler()
@@ -61,7 +60,7 @@ public class DemoServer {
         saveCommand.addSyntax((sender, context) -> {
             if (!(sender instanceof Player player)) return;
             player.sendMessage("Saving...");
-            var polarLoader = new PolarLoader(new PolarWorld());
+            var polarLoader = new FilePolarChunkLoader(new PolarWorld());
             ((InstanceContainer) player.getInstance()).setChunkLoader(polarLoader);
             player.getInstance().saveInstance().join();
             try {

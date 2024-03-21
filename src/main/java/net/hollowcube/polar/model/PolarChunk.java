@@ -1,4 +1,4 @@
-package net.hollowcube.polar;
+package net.hollowcube.polar.model;
 
 
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +25,7 @@ public record PolarChunk(
     public static final int HEIGHTMAP_OCEAN_FLOOR_WG = 0b1000;
     public static final int HEIGHTMAP_WORLD_SURFACE = 0b10000;
     public static final int HEIGHTMAP_WORLD_SURFACE_WG = 0b100000;
-    static final int[] HEIGHTMAPS = new int[]{
+    public static final int[] HEIGHTMAPS = new int[]{
             HEIGHTMAP_NONE,
             HEIGHTMAP_MOTION_BLOCKING,
             HEIGHTMAP_MOTION_BLOCKING_NO_LEAVES,
@@ -34,7 +34,7 @@ public record PolarChunk(
             HEIGHTMAP_WORLD_SURFACE,
             HEIGHTMAP_WORLD_SURFACE_WG,
     };
-    static final int HEIGHTMAP_BYTE_SIZE = 32;
+    public static final int HEIGHTMAP_BYTE_SIZE = 32;
 
     public byte @Nullable [] heightmap(int type) {
         return heightmaps[type];

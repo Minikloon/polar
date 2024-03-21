@@ -1,4 +1,4 @@
-package net.hollowcube.polar;
+package net.hollowcube.polar.model;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

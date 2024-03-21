@@ -1,5 +1,9 @@
 package net.hollowcube.polar;
 
+import net.hollowcube.polar.minestom.FilePolarChunkLoader;
+import net.hollowcube.polar.model.PolarChunk;
+import net.hollowcube.polar.model.PolarSection;
+import net.hollowcube.polar.model.PolarWorld;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.network.NetworkBuffer;
@@ -28,7 +32,7 @@ class TestUserDataWriteRead {
         world.updateChunkAt(0, 0, new PolarChunk(0, 0, emptySections, List.of(), new byte[0][0], new byte[0]));
 
         var wa = new UpdateTimeWorldAccess();
-        var loader = new PolarLoader(world).setWorldAccess(wa);
+        var loader = new FilePolarChunkLoader(world).setWorldAccess(wa);
         var instance = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, loader);
         var chunk = loader.loadChunk(instance, 0, 0).join();
 

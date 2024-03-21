@@ -1,5 +1,10 @@
-package net.hollowcube.polar;
+package net.hollowcube.polar.anvil;
 
+import net.hollowcube.polar.ChunkSelector;
+import net.hollowcube.polar.model.PolarChunk;
+import net.hollowcube.polar.model.PolarSection;
+import net.hollowcube.polar.model.PolarWorld;
+import net.hollowcube.polar.util.PaletteUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.mca.AnvilException;

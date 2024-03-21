@@ -1,5 +1,6 @@
 package net.hollowcube.polar;
 
+import net.hollowcube.polar.minestom.FilePolarChunkLoader;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Provides access to user world data for a {@link PolarLoader} to get and set user
+ * Provides access to user world data for a {@link FilePolarChunkLoader} to get and set user
  * specific world data such as objects, as well as provides some relevant callbacks.
  * <br/><br/>
  * Usage if world access is completely optional, dependent features will not add
@@ -62,7 +63,7 @@ public interface PolarWorldAccess {
     default void saveChunkData(@NotNull Chunk chunk, @NotNull NetworkBuffer userData) {}
 
     /**
-     * Called when a chunk is being loaded by a {@link PolarLoader} to convert biome ids back to instances.
+     * Called when a chunk is being loaded by a {@link FilePolarChunkLoader} to convert biome ids back to instances.
      * <br/><br/>
      * It is valid to change the behavior as long as a biome is returned in all cases (i.e. have a default).
      * <br/><br/>
@@ -74,7 +75,7 @@ public interface PolarWorldAccess {
     default @NotNull Biome getBiome(@NotNull String name) {
         var biome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from(name));
         if (biome == null) {
-            PolarLoader.logger.error("Failed to find biome: {}", name);
+            FilePolarChunkLoader.logger.error("Failed to find biome: {}", name);
             biome = VanillaBiome.PLAINS;
         }
         return biome;
@@ -83,7 +84,7 @@ public interface PolarWorldAccess {
     default @NotNull String getBiomeName(int id) {
         var biome = MinecraftServer.getBiomeManager().getById(id);
         if (biome == null) {
-            PolarLoader.logger.error("Failed to find biome: {}", id);
+            FilePolarChunkLoader.logger.error("Failed to find biome: {}", id);
             biome = VanillaBiome.PLAINS;
         }
         return biome.name();

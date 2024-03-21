@@ -1,7 +1,7 @@
 package net.hollowcube.polar.regression;
 
-import net.hollowcube.polar.PolarLoader;
-import net.hollowcube.polar.PolarWorld;
+import net.hollowcube.polar.minestom.FilePolarChunkLoader;
+import net.hollowcube.polar.model.PolarWorld;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
@@ -22,7 +22,7 @@ class TestIssue17 {
     @Test
     void testIssue17() {
         var world = new PolarWorld();
-        var loader = new PolarLoader(world);
+        var loader = new FilePolarChunkLoader(world);
 
         var instance = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, loader);
         instance.loadChunk(0, 0).join();

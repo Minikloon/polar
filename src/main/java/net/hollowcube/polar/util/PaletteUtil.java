@@ -1,6 +1,6 @@
-package net.hollowcube.polar;
+package net.hollowcube.polar.util;
 
-final class PaletteUtil {
+public final class PaletteUtil {
     private PaletteUtil() {}
 
     public static long[] pack(int[] ints, int bitsPerEntry) {

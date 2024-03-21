@@ -1,7 +1,12 @@
-package net.hollowcube.polar;
+package net.hollowcube.polar.minestom;
 
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import net.hollowcube.polar.PolarFormat;
+import net.hollowcube.polar.PolarWorldAccess;
+import net.hollowcube.polar.model.PolarChunk;
+import net.hollowcube.polar.model.PolarSection;
+import net.hollowcube.polar.model.PolarWorld;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
@@ -10,7 +15,6 @@ import net.minestom.server.instance.*;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.world.biomes.Biome;
 import net.minestom.server.world.biomes.BiomeManager;
 import net.minestom.server.world.biomes.VanillaBiome;
 import org.jetbrains.annotations.Contract;
@@ -32,11 +36,12 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @SuppressWarnings("UnstableApiUsage")
-public class PolarLoader implements IChunkLoader {
+public class FilePolarChunkLoader implements IChunkLoader {
+    private static final Logger logger = LoggerFactory.getLogger(FilePolarChunkLoader.class);
+
     private static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
     private static final BiomeManager BIOME_MANAGER = MinecraftServer.getBiomeManager();
     private static final ExceptionManager EXCEPTION_HANDLER = MinecraftServer.getExceptionManager();
-    static final Logger logger = LoggerFactory.getLogger(PolarLoader.class);
 
     private static final int PLAINS_BIOME_ID = BIOME_MANAGER.getId(VanillaBiome.PLAINS);
 
@@ -51,7 +56,7 @@ public class PolarLoader implements IChunkLoader {
     private boolean parallel = false;
     private boolean loadLighting = true;
 
-    public PolarLoader(@NotNull Path path) throws IOException {
+    public FilePolarChunkLoader(@NotNull Path path) throws IOException {
         this.savePath = path;
         if (Files.exists(path)) {
             this.worldData = PolarFormat.READER.read(Files.readAllBytes(path));
@@ -60,14 +65,14 @@ public class PolarLoader implements IChunkLoader {
         }
     }
 
-    public PolarLoader(@NotNull InputStream inputStream) throws IOException {
+    public FilePolarChunkLoader(@NotNull InputStream inputStream) throws IOException {
         try (inputStream) {
             this.worldData = PolarFormat.READER.read(inputStream.readAllBytes());
             this.savePath = null;
         }
     }
 
-    public PolarLoader(@NotNull PolarWorld world) {
+    public FilePolarChunkLoader(@NotNull PolarWorld world) {
         this.worldData = world;
         this.savePath = null;
     }
@@ -77,7 +82,7 @@ public class PolarLoader implements IChunkLoader {
     }
 
     @Contract("_ -> this")
-    public @NotNull PolarLoader setWorldAccess(@NotNull PolarWorldAccess worldAccess) {
+    public @NotNull FilePolarChunkLoader setWorldAccess(@NotNull PolarWorldAccess worldAccess) {
         this.worldAccess = worldAccess;
         return this;
     }
@@ -93,13 +98,13 @@ public class PolarLoader implements IChunkLoader {
      * @return this
      */
     @Contract("_ -> this")
-    public @NotNull PolarLoader setParallel(boolean parallel) {
+    public @NotNull FilePolarChunkLoader setParallel(boolean parallel) {
         this.parallel = parallel;
         return this;
     }
 
     @Contract("_ -> this")
-    public @NotNull PolarLoader setLoadLighting(boolean loadLighting) {
+    public @NotNull FilePolarChunkLoader setLoadLighting(boolean loadLighting) {
         this.loadLighting = loadLighting;
         return this;
     }

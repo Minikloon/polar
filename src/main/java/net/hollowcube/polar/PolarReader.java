@@ -1,6 +1,10 @@
 package net.hollowcube.polar;
 
 import com.github.luben.zstd.Zstd;
+import net.hollowcube.polar.model.PolarChunk;
+import net.hollowcube.polar.model.PolarSection;
+import net.hollowcube.polar.model.PolarWorld;
+import net.hollowcube.polar.util.PaletteUtil;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -13,8 +17,6 @@ import org.jglrxavpok.hephaistos.nbt.NBTReader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import static net.hollowcube.polar.CompressionType.NONE;
-import static net.hollowcube.polar.CompressionType.ZSTD;
 import static net.minestom.server.network.NetworkBuffer.*;
 
 @SuppressWarnings("UnstableApiUsage")
