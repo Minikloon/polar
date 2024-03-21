@@ -75,7 +75,7 @@ public interface PolarWorldAccess {
     default @NotNull Biome getBiome(@NotNull String name) {
         var biome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from(name));
         if (biome == null) {
-            FilePolarChunkLoader.logger.error("Failed to find biome: {}", name);
+            //FilePolarChunkLoader.logger.error("Failed to find biome: {}", name);
             biome = VanillaBiome.PLAINS;
         }
         return biome;
@@ -84,7 +84,7 @@ public interface PolarWorldAccess {
     default @NotNull String getBiomeName(int id) {
         var biome = MinecraftServer.getBiomeManager().getById(id);
         if (biome == null) {
-            FilePolarChunkLoader.logger.error("Failed to find biome: {}", id);
+            //FilePolarChunkLoader.logger.error("Failed to find biome: {}", id);
             biome = VanillaBiome.PLAINS;
         }
         return biome.name();

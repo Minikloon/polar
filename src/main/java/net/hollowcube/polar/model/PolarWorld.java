@@ -17,11 +17,11 @@ import java.util.List;
 public class PolarWorld {
     public static final short LATEST_VERSION = 5;
 
-    static final short VERSION_UNIFIED_LIGHT = 1;
-    static final short VERSION_USERDATA_OPT_BLOCK_ENT_NBT = 2;
-    static final short VERSION_MINESTOM_NBT_READ_BREAK = 3;
-    static final short VERSION_WORLD_USERDATA = 4;
-    static final short VERSION_SHORT_GRASS = 5; // >:(
+    public static final short VERSION_UNIFIED_LIGHT = 1;
+    public static final short VERSION_USERDATA_OPT_BLOCK_ENT_NBT = 2;
+    public static final short VERSION_MINESTOM_NBT_READ_BREAK = 3;
+    public static final short VERSION_WORLD_USERDATA = 4;
+    public static final short VERSION_SHORT_GRASS = 5; // >:(
 
     public static CompressionType DEFAULT_COMPRESSION = CompressionType.ZSTD;
 
