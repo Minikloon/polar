@@ -17,7 +17,8 @@ class TestAnvilPolar {
         );
         assertEquals(-4, world.minSection());
 
-        var result = PolarWriter.write(world);
+        PolarWriter writer = new PolarWriter();
+        var result = writer.write(world);
         System.out.println(result.length);
         Files.write(Path.of("./src/test/resources/5.polar"), result);
     }

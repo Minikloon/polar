@@ -13,6 +13,8 @@ import org.jglrxavpok.hephaistos.nbt.NBTReader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import static net.hollowcube.polar.CompressionType.NONE;
+import static net.hollowcube.polar.CompressionType.ZSTD;
 import static net.minestom.server.network.NetworkBuffer.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -23,19 +25,19 @@ public class PolarReader {
     private static final int MAX_BLOCK_PALETTE_SIZE = 16*16*16;
     private static final int MAX_BIOME_PALETTE_SIZE = 8*8*8;
 
-    private PolarReader() {}
+    protected PolarReader() {}
 
-    public static @NotNull PolarWorld read(byte @NotNull [] data) {
+    public @NotNull PolarWorld read(byte[] data) {
         var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
         buffer.writeIndex(data.length); // Set write index to end so readableBytes returns remaining bytes
 
         var magicNumber = buffer.read(INT);
-        assertThat(magicNumber == PolarWorld.MAGIC_NUMBER, "Invalid magic number");
+        assertThat(magicNumber == PolarFormat.MAGIC_NUMBER, "Invalid magic number");
 
         short version = buffer.read(SHORT);
         validateVersion(version);
 
-        var compression = PolarWorld.CompressionType.fromId(buffer.read(BYTE));
+        var compression = CompressionType.fromId(buffer.read(BYTE));
         assertThat(compression != null, "Invalid compression type");
         var compressedDataLength = buffer.read(VAR_INT);
 
@@ -55,7 +57,7 @@ public class PolarReader {
         return new PolarWorld(version, compression, minSection, maxSection, userData, chunks);
     }
 
-    private static @NotNull PolarChunk readChunk(short version, @NotNull NetworkBuffer buffer, int sectionCount) {
+    private @NotNull PolarChunk readChunk(short version, @NotNull NetworkBuffer buffer, int sectionCount) {
         var chunkX = buffer.read(VAR_INT);
         var chunkZ = buffer.read(VAR_INT);
 
@@ -89,7 +91,7 @@ public class PolarReader {
         );
     }
 
-    private static @NotNull PolarSection readSection(short version, @NotNull NetworkBuffer buffer) {
+    private @NotNull PolarSection readSection(short version, @NotNull NetworkBuffer buffer) {
         // If section is empty exit immediately
         if (buffer.read(BOOLEAN)) return new PolarSection();
 
@@ -135,7 +137,7 @@ public class PolarReader {
         return new PolarSection(blockPalette, blockData, biomePalette, biomeData, blockLight, skyLight);
     }
 
-    private static @NotNull PolarChunk.BlockEntity readBlockEntity(int version, @NotNull NetworkBuffer buffer) {
+    private @NotNull PolarChunk.BlockEntity readBlockEntity(int version, @NotNull NetworkBuffer buffer) {
         int posIndex = buffer.read(INT);
         var id = buffer.readOptional(STRING);
 
@@ -156,13 +158,13 @@ public class PolarReader {
         );
     }
 
-    private static void validateVersion(int version) {
+    private void validateVersion(int version) {
         var invalidVersionError = String.format("Unsupported Polar version. Up to %d is supported, found %d.",
                 PolarWorld.LATEST_VERSION, version);
         assertThat(version <= PolarWorld.LATEST_VERSION, invalidVersionError);
     }
 
-    private static @NotNull NetworkBuffer decompressBuffer(@NotNull NetworkBuffer buffer, @NotNull PolarWorld.CompressionType compression, int length) {
+    private @NotNull NetworkBuffer decompressBuffer(@NotNull NetworkBuffer buffer, @NotNull CompressionType compression, int length) {
         return switch (compression) {
             case NONE -> buffer;
             case ZSTD -> {
@@ -180,7 +182,7 @@ public class PolarReader {
      *
      * @see NetworkBuffer#NBT
      */
-    private static org.jglrxavpok.hephaistos.nbt.NBT legacyReadNBT(@NotNull NetworkBuffer buffer) {
+    private org.jglrxavpok.hephaistos.nbt.NBT legacyReadNBT(@NotNull NetworkBuffer buffer) {
         try {
             var nbtReader = new NBTReader(new InputStream() {
                 @Override

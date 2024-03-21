@@ -14,7 +14,6 @@ import java.util.List;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class PolarWorld {
-    public static final int MAGIC_NUMBER = 0x506F6C72; // `Polr`
     public static final short LATEST_VERSION = 5;
 
     static final short VERSION_UNIFIED_LIGHT = 1;
@@ -99,15 +98,5 @@ public class PolarWorld {
         return chunks.values();
     }
 
-    public enum CompressionType {
-        NONE,
-        ZSTD;
 
-        private static final CompressionType[] VALUES = values();
-
-        public static @Nullable CompressionType fromId(int id) {
-            if (id < 0 || id >= VALUES.length) return null;
-            return VALUES[id];
-        }
-    }
 }

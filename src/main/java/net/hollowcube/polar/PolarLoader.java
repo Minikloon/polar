@@ -58,7 +58,7 @@ public class PolarLoader implements IChunkLoader {
     public PolarLoader(@NotNull Path path) throws IOException {
         this.savePath = path;
         if (Files.exists(path)) {
-            this.worldData = PolarReader.read(Files.readAllBytes(path));
+            this.worldData = PolarFormat.READER.read(Files.readAllBytes(path));
         } else {
             this.worldData = new PolarWorld();
         }
@@ -66,7 +66,7 @@ public class PolarLoader implements IChunkLoader {
 
     public PolarLoader(@NotNull InputStream inputStream) throws IOException {
         try (inputStream) {
-            this.worldData = PolarReader.read(inputStream.readAllBytes());
+            this.worldData = PolarFormat.READER.read(inputStream.readAllBytes());
             this.savePath = null;
         }
     }
@@ -272,7 +272,7 @@ public class PolarLoader implements IChunkLoader {
         if (savePath != null) {
             return CompletableFuture.runAsync(() -> {
                 try {
-                    Files.write(savePath, PolarWriter.write(worldData),
+                    Files.write(savePath, PolarFormat.WRITER.write(worldData),
                             StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                 } catch (IOException e) {
                     EXCEPTION_HANDLER.handleException(new RuntimeException("Failed to save world", e));

@@ -11,19 +11,19 @@ import static net.minestom.server.network.NetworkBuffer.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PolarWriter {
-    private PolarWriter() {}
+    protected PolarWriter() {}
 
-    public static byte[] write(@NotNull PolarWorld world) {
+    public byte[] write(@NotNull PolarWorld world) {
         // Write the compressed content first
         var content = new NetworkBuffer(ByteBuffer.allocate(1024));
         content.write(BYTE, world.minSection());
         content.write(BYTE, world.maxSection());
         content.write(BYTE_ARRAY, world.userData());
-        content.writeCollection(world.chunks(), PolarWriter::writeChunk);
+        content.writeCollection(world.chunks(), this::writeChunk);
 
         // Create final buffer
         return NetworkBuffer.makeArray(buffer -> {
-            buffer.write(INT, PolarWorld.MAGIC_NUMBER);
+            buffer.write(INT, PolarFormat.MAGIC_NUMBER);
             buffer.write(SHORT, PolarWorld.LATEST_VERSION);
             buffer.write(BYTE, (byte) world.compression().ordinal());
             switch (world.compression()) {
@@ -39,14 +39,14 @@ public class PolarWriter {
         });
     }
 
-    private static void writeChunk(@NotNull NetworkBuffer buffer, @NotNull PolarChunk chunk) {
+    private void writeChunk(@NotNull NetworkBuffer buffer, @NotNull PolarChunk chunk) {
         buffer.write(VAR_INT, chunk.x());
         buffer.write(VAR_INT, chunk.z());
 
         for (var section : chunk.sections()) {
             writeSection(buffer, section);
         }
-        buffer.writeCollection(chunk.blockEntities(), PolarWriter::writeBlockEntity);
+        buffer.writeCollection(chunk.blockEntities(), this::writeBlockEntity);
 
         //todo heightmaps
         buffer.write(INT, PolarChunk.HEIGHTMAP_NONE);
@@ -54,7 +54,7 @@ public class PolarWriter {
         buffer.write(BYTE_ARRAY, chunk.userData());
     }
 
-    private static void writeSection(@NotNull NetworkBuffer buffer, @NotNull PolarSection section) {
+    private void writeSection(@NotNull NetworkBuffer buffer, @NotNull PolarSection section) {
         buffer.write(BOOLEAN, section.isEmpty());
         if (section.isEmpty()) return;
 
@@ -87,7 +87,7 @@ public class PolarWriter {
             buffer.write(RAW_BYTES, section.skyLight());
     }
 
-    private static void writeBlockEntity(@NotNull NetworkBuffer buffer, @NotNull PolarChunk.BlockEntity blockEntity) {
+    private void writeBlockEntity(@NotNull NetworkBuffer buffer, @NotNull PolarChunk.BlockEntity blockEntity) {
         var index = ChunkUtils.getBlockIndex(blockEntity.x(), blockEntity.y(), blockEntity.z());
         buffer.write(INT, index);
         buffer.writeOptional(STRING, blockEntity.id());

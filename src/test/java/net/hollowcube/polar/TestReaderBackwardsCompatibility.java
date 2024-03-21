@@ -37,7 +37,7 @@ class TestReaderBackwardsCompatibility {
         assertNotNull(is);
 
         var worldData = assertDoesNotThrow(is::readAllBytes);
-        var world = assertDoesNotThrow(() -> PolarReader.read(worldData));
+        var world = assertDoesNotThrow(() -> PolarFormat.READER.read(worldData));
         assertNotNull(world);
 
         assertEquals(32 * 32, world.chunks().size());

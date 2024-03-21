@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "dev.hollowcube"
-version = System.getenv("TAG_VERSION") ?: "dev"
+version = System.getenv("TAG_VERSION") ?: "dev-kloon"
 description = "Fast and small world format for Minestom"
 
 repositories {
