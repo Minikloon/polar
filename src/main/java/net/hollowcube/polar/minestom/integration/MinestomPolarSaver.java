@@ -7,11 +7,14 @@ import net.hollowcube.polar.model.PolarChunk;
 import net.hollowcube.polar.model.PolarSection;
 import net.hollowcube.polar.model.PolarWorld;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.Section;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 public class MinestomPolarSaver {
     private final PolarWorld polarWorld;
@@ -23,7 +26,7 @@ public class MinestomPolarSaver {
     }
 
     public void writeChunksDataToMemory(@NotNull Collection<Chunk> chunks) {
-        var blockCache = new Short2ObjectOpenHashMap<String>();
+        Short2ObjectOpenHashMap<String> blockCache = new Short2ObjectOpenHashMap<String>();
 
         // Update state of each chunk locally
         chunks.forEach(c -> updateChunkData(blockCache, c));
@@ -34,35 +37,35 @@ public class MinestomPolarSaver {
     }
 
     private void updateChunkData(@NotNull Short2ObjectMap<String> blockCache, @NotNull Chunk chunk) {
-        var dimension = chunk.getInstance().getDimensionType();
+        DimensionType dimension = chunk.getInstance().getDimensionType();
 
-        var blockEntities = new ArrayList<PolarChunk.BlockEntity>();
-        var sections = new PolarSection[dimension.getHeight() / Chunk.CHUNK_SECTION_SIZE];
+        ArrayList<PolarChunk.BlockEntity> blockEntities = new ArrayList<PolarChunk.BlockEntity>();
+        PolarSection[] sections = new PolarSection[dimension.getHeight() / Chunk.CHUNK_SECTION_SIZE];
         assert sections.length == chunk.getSections().size(): "World height mismatch";
 
-        var heightmaps = new byte[32][PolarChunk.HEIGHTMAPS.length];
+        byte[][] heightmaps = new byte[32][PolarChunk.HEIGHTMAPS.length];
 
-        var userData = new byte[0];
+        byte[] userData = new byte[0];
 
         synchronized (chunk) {
             for (int i = 0; i < sections.length; i++) {
                 int sectionY = i + chunk.getMinSection();
-                var section = chunk.getSection(sectionY);
+                Section section = chunk.getSection(sectionY);
                 //todo check if section is empty and skip
 
-                var blockPalette = new ArrayList<String>();
+                ArrayList<String> blockPalette = new ArrayList<String>();
                 int[] blockData = null;
                 if (section.blockPalette().count() == 0) {
                     // Short circuit empty palette
                     blockPalette.add("air");
                 } else {
-                    var localBlockData = new int[PolarSection.BLOCK_PALETTE_SIZE];
+                    int[] localBlockData = new int[PolarSection.BLOCK_PALETTE_SIZE];
 
                     section.blockPalette().getAll((x, sectionLocalY, z, blockStateId) -> {
                         final int blockIndex = x + sectionLocalY * 16 * 16 + z * 16;
 
                         // Section palette
-                        var namespace = blockCache.computeIfAbsent((short) blockStateId, unused -> blockToString(Block.fromStateId((short) blockStateId)));
+                        String namespace = blockCache.computeIfAbsent((short) blockStateId, unused -> blockToString(Block.fromStateId((short) blockStateId)));
                         int paletteId = blockPalette.indexOf(namespace);
                         if (paletteId == -1) {
                             paletteId = blockPalette.size();
@@ -78,10 +81,10 @@ public class MinestomPolarSaver {
                         for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
                             for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
                                 int y = sectionLocalY + sectionY * Chunk.CHUNK_SECTION_SIZE;
-                                var block = chunk.getBlock(x, y, z, Block.Getter.Condition.CACHED);
+                                Block block = chunk.getBlock(x, y, z, Block.Getter.Condition.CACHED);
                                 if (block == null) continue;
 
-                                var handlerId = block.handler() == null ? null : block.handler().getNamespaceId().asString();
+                                String handlerId = block.handler() == null ? null : block.handler().getNamespaceId().asString();
                                 if (handlerId != null || block.hasNbt()) {
                                     blockEntities.add(new PolarChunk.BlockEntity(
                                             x, y, z, handlerId, block.nbt()
@@ -92,13 +95,13 @@ public class MinestomPolarSaver {
                     }
                 }
 
-                var biomePalette = new ArrayList<String>();
-                var biomeData = new int[PolarSection.BIOME_PALETTE_SIZE];
+                ArrayList<String> biomePalette = new ArrayList<String>();
+                int[] biomeData = new int[PolarSection.BIOME_PALETTE_SIZE];
 
                 section.biomePalette().getAll((x, y, z, id) -> {
-                    var biomeId = biomeCache.getBiomeName(id);
+                    String biomeId = biomeCache.getBiomeName(id);
 
-                    var paletteId = biomePalette.indexOf(biomeId);
+                    int paletteId = biomePalette.indexOf(biomeId);
                     if (paletteId == -1) {
                         paletteId = biomePalette.size();
                         biomePalette.add(biomeId);
@@ -137,11 +140,11 @@ public class MinestomPolarSaver {
     }
 
     private @NotNull String blockToString(@NotNull Block block) {
-        var builder = new StringBuilder(block.name());
+        StringBuilder builder = new StringBuilder(block.name());
         if (block.properties().isEmpty()) return builder.toString();
 
         builder.append('[');
-        for (var entry : block.properties().entrySet()) {
+        for (Map.Entry<String, String> entry : block.properties().entrySet()) {
             builder.append(entry.getKey())
                     .append('=')
                     .append(entry.getValue())

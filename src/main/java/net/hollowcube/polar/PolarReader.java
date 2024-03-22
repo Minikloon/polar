@@ -16,6 +16,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTReader;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
@@ -30,18 +31,18 @@ public class PolarReader {
     protected PolarReader() {}
 
     public @NotNull PolarWorld read(byte[] data) {
-        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
+        NetworkBuffer buffer = new NetworkBuffer(ByteBuffer.wrap(data));
         buffer.writeIndex(data.length); // Set write index to end so readableBytes returns remaining bytes
 
-        var magicNumber = buffer.read(INT);
+        Integer magicNumber = buffer.read(INT);
         assertThat(magicNumber == PolarFormat.MAGIC_NUMBER, "Invalid magic number");
 
         short version = buffer.read(SHORT);
         validateVersion(version);
 
-        var compression = CompressionType.fromId(buffer.read(BYTE));
+        CompressionType compression = CompressionType.fromId(buffer.read(BYTE));
         assertThat(compression != null, "Invalid compression type");
-        var compressedDataLength = buffer.read(VAR_INT);
+        Integer compressedDataLength = buffer.read(VAR_INT);
 
         // Replace the buffer with a "decompressed" version. This is a no-op if compression is NONE.
         buffer = decompressBuffer(buffer, compression, compressedDataLength);
@@ -49,23 +50,23 @@ public class PolarReader {
         byte minSection = buffer.read(BYTE), maxSection = buffer.read(BYTE);
         assertThat(minSection < maxSection, "Invalid section range");
 
-        var chunks = buffer.readCollection(b -> readChunk(version, b, maxSection - minSection + 1), MAX_CHUNKS);
+        List<PolarChunk> chunks = buffer.readCollection(b -> readChunk(version, b, maxSection - minSection + 1), MAX_CHUNKS);
 
         return new PolarWorld(version, compression, minSection, maxSection, chunks);
     }
 
     private @NotNull PolarChunk readChunk(short version, @NotNull NetworkBuffer buffer, int sectionCount) {
-        var chunkX = buffer.read(VAR_INT);
-        var chunkZ = buffer.read(VAR_INT);
+        Integer chunkX = buffer.read(VAR_INT);
+        Integer chunkZ = buffer.read(VAR_INT);
 
-        var sections = new PolarSection[sectionCount];
+        PolarSection[] sections = new PolarSection[sectionCount];
         for (int i = 0; i < sectionCount; i++) {
             sections[i] = readSection(version, buffer);
         }
 
-        var blockEntities = buffer.readCollection(b -> readBlockEntity(version, b), MAX_BLOCK_ENTITIES);
+        List<PolarChunk.BlockEntity> blockEntities = buffer.readCollection(b -> readBlockEntity(version, b), MAX_BLOCK_ENTITIES);
 
-        var heightmaps = new byte[PolarChunk.HEIGHTMAP_BYTE_SIZE][PolarChunk.HEIGHTMAPS.length];
+        byte[][] heightmaps = new byte[PolarChunk.HEIGHTMAP_BYTE_SIZE][PolarChunk.HEIGHTMAPS.length];
         int heightmapMask = buffer.read(INT);
         for (int i = 0; i < PolarChunk.HEIGHTMAPS.length; i++) {
             if ((heightmapMask & PolarChunk.HEIGHTMAPS[i]) == 0)
@@ -92,7 +93,7 @@ public class PolarReader {
         // If section is empty exit immediately
         if (buffer.read(BOOLEAN)) return new PolarSection();
 
-        var blockPalette = buffer.readCollection(STRING, MAX_BLOCK_PALETTE_SIZE).toArray(String[]::new);
+        String[] blockPalette = buffer.readCollection(STRING, MAX_BLOCK_PALETTE_SIZE).toArray(String[]::new);
         if (version <= PolarWorld.VERSION_SHORT_GRASS) {
             for (int i = 0; i < blockPalette.length; i++) {
                 String strippedID = blockPalette[i].split("\\[")[0];
@@ -104,18 +105,18 @@ public class PolarReader {
         if (blockPalette.length > 1) {
             blockData = new int[PolarSection.BLOCK_PALETTE_SIZE];
 
-            var rawBlockData = buffer.read(LONG_ARRAY);
-            var bitsPerEntry = rawBlockData.length * 64 / PolarSection.BLOCK_PALETTE_SIZE;
+            long[] rawBlockData = buffer.read(LONG_ARRAY);
+            int bitsPerEntry = rawBlockData.length * 64 / PolarSection.BLOCK_PALETTE_SIZE;
             PaletteUtil.unpack(blockData, rawBlockData, bitsPerEntry);
         }
 
-        var biomePalette = buffer.readCollection(STRING, MAX_BIOME_PALETTE_SIZE).toArray(String[]::new);
+        String[] biomePalette = buffer.readCollection(STRING, MAX_BIOME_PALETTE_SIZE).toArray(String[]::new);
         int[] biomeData = null;
         if (biomePalette.length > 1) {
             biomeData = new int[PolarSection.BIOME_PALETTE_SIZE];
 
-            var rawBiomeData = buffer.read(LONG_ARRAY);
-            var bitsPerEntry = rawBiomeData.length * 64 / PolarSection.BIOME_PALETTE_SIZE;
+            long[] rawBiomeData = buffer.read(LONG_ARRAY);
+            int bitsPerEntry = rawBiomeData.length * 64 / PolarSection.BIOME_PALETTE_SIZE;
             PaletteUtil.unpack(biomeData, rawBiomeData, bitsPerEntry);
         }
 
@@ -136,7 +137,7 @@ public class PolarReader {
 
     private @NotNull PolarChunk.BlockEntity readBlockEntity(int version, @NotNull NetworkBuffer buffer) {
         int posIndex = buffer.read(INT);
-        var id = buffer.readOptional(STRING);
+        String id = buffer.readOptional(STRING);
 
         NBTCompound nbt = null;
         if (version <= PolarWorld.VERSION_USERDATA_OPT_BLOCK_ENT_NBT || buffer.read(BOOLEAN)) {
@@ -156,7 +157,7 @@ public class PolarReader {
     }
 
     private void validateVersion(int version) {
-        var invalidVersionError = String.format("Unsupported Polar version. Up to %d is supported, found %d.",
+        String invalidVersionError = String.format("Unsupported Polar version. Up to %d is supported, found %d.",
                 PolarWorld.LATEST_VERSION, version);
         assertThat(version <= PolarWorld.LATEST_VERSION, invalidVersionError);
     }
@@ -165,8 +166,8 @@ public class PolarReader {
         return switch (compression) {
             case NONE -> buffer;
             case ZSTD -> {
-                var bytes = Zstd.decompress(buffer.readBytes(buffer.readableBytes()), length);
-                var newBuffer = new NetworkBuffer(ByteBuffer.wrap(bytes));
+                byte[] bytes = Zstd.decompress(buffer.readBytes(buffer.readableBytes()), length);
+                NetworkBuffer newBuffer = new NetworkBuffer(ByteBuffer.wrap(bytes));
                 newBuffer.writeIndex(bytes.length);
                 yield newBuffer;
             }
@@ -181,7 +182,7 @@ public class PolarReader {
      */
     private org.jglrxavpok.hephaistos.nbt.NBT legacyReadNBT(@NotNull NetworkBuffer buffer) {
         try {
-            var nbtReader = new NBTReader(new InputStream() {
+            NBTReader nbtReader = new NBTReader(new InputStream() {
                 @Override
                 public int read() {
                     return buffer.read(BYTE) & 0xFF;

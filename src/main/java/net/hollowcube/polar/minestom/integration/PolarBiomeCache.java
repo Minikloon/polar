@@ -33,7 +33,7 @@ public class PolarBiomeCache {
     }
 
     protected Biome computeBiome(@NotNull String name) {
-        var biome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from(name));
+        Biome biome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from(name));
         if (biome == null) {
             logger.error("Failed to find biome: {}", name);
             biome = VanillaBiome.PLAINS;
@@ -46,7 +46,7 @@ public class PolarBiomeCache {
     }
 
     protected String computeBiomeName(int id) {
-        var biome = MinecraftServer.getBiomeManager().getById(id);
+        Biome biome = MinecraftServer.getBiomeManager().getById(id);
         if (biome == null) {
             logger.error("Failed to find biome: {}", id);
             biome = VanillaBiome.PLAINS;

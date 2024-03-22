@@ -32,7 +32,7 @@ public class MinestomPolarLoader {
 
     public final @Nullable Chunk loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
         // Only need to lock for this tiny part, chunks are immutable.
-        var chunkData = polarWorld.chunkAt(chunkX, chunkZ);
+        PolarChunk chunkData = polarWorld.chunkAt(chunkX, chunkZ);
         if (chunkData == null) return null;
 
         // We are making the assumption here that the chunk height is the same as this world.
@@ -41,21 +41,21 @@ public class MinestomPolarLoader {
         // here it can be ignored/assumed.
 
         // Load the chunk
-        var chunk = instance.getChunkSupplier().createChunk(instance, chunkX, chunkZ);
+        Chunk chunk = instance.getChunkSupplier().createChunk(instance, chunkX, chunkZ);
 
         int sectionY = chunk.getMinSection();
-        for (var sectionData : chunkData.sections()) {
+        for (PolarSection sectionData : chunkData.sections()) {
             if (sectionData.isEmpty()) {
                 sectionY++;
                 continue;
             }
 
-            var section = chunk.getSection(sectionY);
+            Section section = chunk.getSection(sectionY);
             loadSection(sectionData, section);
             sectionY++;
         }
 
-        for (var blockEntity : chunkData.blockEntities()) {
+        for (PolarChunk.BlockEntity blockEntity : chunkData.blockEntities()) {
             loadBlockEntity(blockEntity, chunk);
         }
 
@@ -66,8 +66,8 @@ public class MinestomPolarLoader {
         // assumed that section is _not_ empty
 
         // Blocks
-        var rawBlockPalette = sectionData.blockPalette();
-        var blockPalette = new Block[rawBlockPalette.length];
+        String[] rawBlockPalette = sectionData.blockPalette();
+        Block[] blockPalette = new Block[rawBlockPalette.length];
         for (int i = 0; i < rawBlockPalette.length; i++) {
             try {
                 //noinspection deprecation
@@ -80,7 +80,7 @@ public class MinestomPolarLoader {
         if (blockPalette.length == 1) {
             section.blockPalette().fill(blockPalette[0].stateId());
         } else {
-            final var paletteData = sectionData.blockData();
+            final int[] paletteData = sectionData.blockData();
             section.blockPalette().setAll((x, y, z) -> {
                 int index = y * Chunk.CHUNK_SECTION_SIZE * Chunk.CHUNK_SECTION_SIZE + z * Chunk.CHUNK_SECTION_SIZE + x;
                 return blockPalette[paletteData[index]].stateId();
@@ -88,19 +88,19 @@ public class MinestomPolarLoader {
         }
 
         // Biomes
-        var rawBiomePalette = sectionData.biomePalette();
-        var biomePalette = new int[rawBiomePalette.length];
+        String[] rawBiomePalette = sectionData.biomePalette();
+        int[] biomePalette = new int[rawBiomePalette.length];
         for (int i = 0; i < rawBiomePalette.length; i++) {
             biomePalette[i] = biomeCache.getBiomeId(rawBiomePalette[i]);
         }
         if (biomePalette.length == 1) {
             section.biomePalette().fill(biomePalette[0]);
         } else {
-            final var paletteData = sectionData.biomeData();
+            final int[] paletteData = sectionData.biomeData();
             section.biomePalette().setAll((x, y, z) -> {
                 int index = x / 4 + (z / 4) * 4 + (y / 4) * 16;
 
-                var paletteIndex = paletteData[index];
+                int paletteIndex = paletteData[index];
                 if (paletteIndex >= biomePalette.length) {
                     logger.error("Invalid biome palette index. This is probably a corrupted world, " +
                             "but it has been loaded with plains instead. No data has been written.");
@@ -122,7 +122,7 @@ public class MinestomPolarLoader {
 
     private void loadBlockEntity(@NotNull PolarChunk.BlockEntity blockEntity, @NotNull Chunk chunk) {
         // Fetch the block type, we can ignore Handler/NBT since we are about to replace it
-        var block = chunk.getBlock(blockEntity.x(), blockEntity.y(), blockEntity.z(), Block.Getter.Condition.TYPE);
+        Block block = chunk.getBlock(blockEntity.x(), blockEntity.y(), blockEntity.z(), Block.Getter.Condition.TYPE);
 
         if (blockEntity.id() != null)
             block = block.withHandler(BLOCK_MANAGER.getHandlerOrDummy(blockEntity.id()));

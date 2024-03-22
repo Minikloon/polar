@@ -55,8 +55,8 @@ public class PolarWorld {
         this.minSection = minSection;
         this.maxSection = maxSection;
 
-        for (var chunk : chunks) {
-            var index = ChunkUtils.getChunkIndex(chunk.x(), chunk.z());
+        for (PolarChunk chunk : chunks) {
+            long index = ChunkUtils.getChunkIndex(chunk.x(), chunk.z());
             this.chunks.put(index, chunk);
         }
     }

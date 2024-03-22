@@ -10,7 +10,7 @@ class TestPolarReader {
 
     @Test
     void testReadInvalidMagic() {
-        var e = assertThrows(PolarReader.Error.class, () -> {
+        PolarReader.Error e = assertThrows(PolarReader.Error.class, () -> {
             PolarFormat.READER.read(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
         });
         assertEquals("Invalid magic number", e.getMessage());
@@ -18,7 +18,7 @@ class TestPolarReader {
 
     @Test
     void testNewerVersionFail() {
-        var e = assertThrows(PolarReader.Error.class, () -> {
+        PolarReader.Error e = assertThrows(PolarReader.Error.class, () -> {
             PolarFormat.READER.read(new byte[]{
                     0x50, 0x6F, 0x6C, 0x72, // magic number
                     0x50, 0x50, // version

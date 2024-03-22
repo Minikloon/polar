@@ -19,7 +19,7 @@ public class PolarWriter {
 
     public byte[] write(@NotNull PolarWorld world) {
         // Write the compressed content first
-        var content = new NetworkBuffer(ByteBuffer.allocate(1024));
+        NetworkBuffer content = new NetworkBuffer(ByteBuffer.allocate(1024));
         content.write(BYTE, world.minSection());
         content.write(BYTE, world.maxSection());
         content.writeCollection(world.chunks(), this::writeChunk);
@@ -46,7 +46,7 @@ public class PolarWriter {
         buffer.write(VAR_INT, chunk.x());
         buffer.write(VAR_INT, chunk.z());
 
-        for (var section : chunk.sections()) {
+        for (PolarSection section : chunk.sections()) {
             writeSection(buffer, section);
         }
         buffer.writeCollection(chunk.blockEntities(), this::writeBlockEntity);
@@ -62,21 +62,21 @@ public class PolarWriter {
         if (section.isEmpty()) return;
 
         // Blocks
-        var blockPalette = section.blockPalette();
+        String[] blockPalette = section.blockPalette();
         buffer.writeCollection(STRING, blockPalette);
         if (blockPalette.length > 1) {
-            var blockData = section.blockData();
-            var bitsPerEntry = (int) Math.ceil(Math.log(blockPalette.length) / Math.log(2));
+            int[] blockData = section.blockData();
+            int bitsPerEntry = (int) Math.ceil(Math.log(blockPalette.length) / Math.log(2));
             if (bitsPerEntry < 1) bitsPerEntry = 1;
             buffer.write(LONG_ARRAY, PaletteUtil.pack(blockData, bitsPerEntry));
         }
 
         // Biomes
-        var biomePalette = section.biomePalette();
+        String[] biomePalette = section.biomePalette();
         buffer.writeCollection(STRING, biomePalette);
         if (biomePalette.length > 1) {
-            var biomeData = section.biomeData();
-            var bitsPerEntry = (int) Math.ceil(Math.log(biomePalette.length) / Math.log(2));
+            int[] biomeData = section.biomeData();
+            int bitsPerEntry = (int) Math.ceil(Math.log(biomePalette.length) / Math.log(2));
             if (bitsPerEntry < 1) bitsPerEntry = 1;
             buffer.write(LONG_ARRAY, PaletteUtil.pack(biomeData, bitsPerEntry));
         }
@@ -91,7 +91,7 @@ public class PolarWriter {
     }
 
     private void writeBlockEntity(@NotNull NetworkBuffer buffer, @NotNull PolarChunk.BlockEntity blockEntity) {
-        var index = ChunkUtils.getBlockIndex(blockEntity.x(), blockEntity.y(), blockEntity.z());
+        int index = ChunkUtils.getBlockIndex(blockEntity.x(), blockEntity.y(), blockEntity.z());
         buffer.write(INT, index);
         buffer.writeOptional(STRING, blockEntity.id());
         buffer.writeOptional(NBT, blockEntity.data());

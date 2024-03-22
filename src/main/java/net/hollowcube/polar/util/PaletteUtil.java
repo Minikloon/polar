@@ -24,8 +24,8 @@ public final class PaletteUtil {
     public static void unpack(int[] out, long[] in, int bitsPerEntry) {
         assert in.length != 0: "unpack input array is zero";
 
-        var intsPerLong = Math.floor(64d / bitsPerEntry);
-        var intsPerLongCeil = (int) Math.ceil(intsPerLong);
+        double intsPerLong = Math.floor(64d / bitsPerEntry);
+        int intsPerLongCeil = (int) Math.ceil(intsPerLong);
 
         long mask = (1L << bitsPerEntry) - 1L;
         for (int i = 0; i < out.length; i++) {
