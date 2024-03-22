@@ -49,14 +49,9 @@ public class PolarReader {
         byte minSection = buffer.read(BYTE), maxSection = buffer.read(BYTE);
         assertThat(minSection < maxSection, "Invalid section range");
 
-        // User (world) data
-        byte[] userData = new byte[0];
-        if (version > PolarWorld.VERSION_WORLD_USERDATA)
-            userData = buffer.read(BYTE_ARRAY);
-
         var chunks = buffer.readCollection(b -> readChunk(version, b, maxSection - minSection + 1), MAX_CHUNKS);
 
-        return new PolarWorld(version, compression, minSection, maxSection, userData, chunks);
+        return new PolarWorld(version, compression, minSection, maxSection, chunks);
     }
 
     private @NotNull PolarChunk readChunk(short version, @NotNull NetworkBuffer buffer, int sectionCount) {

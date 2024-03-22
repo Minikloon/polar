@@ -1,6 +1,5 @@
 package net.hollowcube.polar.anvil;
 
-import net.hollowcube.polar.ChunkSelector;
 import net.hollowcube.polar.model.PolarChunk;
 import net.hollowcube.polar.model.PolarSection;
 import net.hollowcube.polar.model.PolarWorld;
@@ -124,7 +123,6 @@ public class AnvilPolar {
                 PolarWorld.LATEST_VERSION,
                 PolarWorld.DEFAULT_COMPRESSION,
                 (byte) minSection, (byte) maxSection,
-                new byte[0],
                 chunks
         );
     }
