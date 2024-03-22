@@ -3,9 +3,11 @@ package net.hollowcube.polar.minestom;
 import net.hollowcube.polar.PolarFormat;
 import net.hollowcube.polar.minestom.integration.InMemoryPolarWorld;
 import net.hollowcube.polar.model.PolarWorld;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.thread.TickThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -65,7 +67,7 @@ public abstract class PolarChunkLoader implements IChunkLoader {
         return loadingWorld.thenApplyAsync(inMemory -> {
             inMemory.getSaver().writeChunksDataToMemory(chunks);
             return inMemory;
-        }, r -> instance.scheduler().scheduleNextTick(r)).thenComposeAsync(inMemory -> {
+        }, this::sync).thenComposeAsync(inMemory -> {
             byte[] bytes = inMemory.getSaver().saveChunks();
             return saveWorld(bytes);
         });
@@ -80,6 +82,15 @@ public abstract class PolarChunkLoader implements IChunkLoader {
     public void unloadChunk(Chunk chunk) {
         loadingWorld.thenAcceptAsync(inMemory -> {
             inMemory.getSaver().writeChunksDataToMemory(List.of(chunk));
-        }, r -> instance.scheduler().scheduleNextTick(r));
+        }, this::sync);
+    }
+
+    private void sync(Runnable runnable) {
+        Thread currentThread = Thread.currentThread();
+        if (currentThread instanceof TickThread) {
+            runnable.run();
+        } else {
+            instance.scheduler().scheduleNextTick(runnable);
+        }
     }
 }
