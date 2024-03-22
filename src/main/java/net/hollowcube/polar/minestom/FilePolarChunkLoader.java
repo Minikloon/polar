@@ -7,13 +7,11 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("UnstableApiUsage")
 public class FilePolarChunkLoader extends PolarChunkLoader {
     private final Path path;
 
     public FilePolarChunkLoader(@NotNull Path path) {
         this.path = path;
-
     }
 
     @Override
