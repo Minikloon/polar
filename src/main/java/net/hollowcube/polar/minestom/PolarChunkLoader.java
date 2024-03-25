@@ -32,6 +32,10 @@ public abstract class PolarChunkLoader implements IChunkLoader {
         return loadingWorld == null || !loadingWorld.isDone();
     }
 
+    public CompletableFuture<InMemoryPolarWorld> getLoadingFuture() {
+        return loadingWorld;
+    }
+
     @Override
     public void loadInstance(@NotNull Instance instance) {
         this.instance = instance;

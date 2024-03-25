@@ -21,10 +21,10 @@ public class FilePolarChunkLoader extends PolarChunkLoader {
                 if (Files.exists(path)) {
                     return Files.readAllBytes(path);
                 } else {
-                    return null;
+                    throw new IllegalStateException("World doesn't exist at " + path);
                 }
             } catch (Throwable t) {
-                throw new RuntimeException("Error loading world", t);
+                throw new RuntimeException("Error loading world at " + path, t);
             }
         });
     }
