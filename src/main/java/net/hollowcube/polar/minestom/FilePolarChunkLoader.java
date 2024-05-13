@@ -14,6 +14,10 @@ public class FilePolarChunkLoader extends PolarChunkLoader {
         this.path = path;
     }
 
+    public Path getPath() {
+        return path;
+    }
+
     @Override
     public CompletableFuture<byte[]> loadWorld() {
         return CompletableFuture.supplyAsync(() -> {
