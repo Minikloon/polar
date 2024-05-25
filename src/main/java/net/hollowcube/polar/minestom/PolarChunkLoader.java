@@ -91,7 +91,7 @@ public abstract class PolarChunkLoader implements IChunkLoader {
 
     private void sync(Runnable runnable) {
         Thread currentThread = Thread.currentThread();
-        if (currentThread instanceof TickThread) {
+        if (currentThread instanceof TickThread || MinecraftServer.isStopping()) {
             runnable.run();
         } else {
             instance.scheduler().scheduleNextTick(runnable);
