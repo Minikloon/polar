@@ -5,15 +5,16 @@ import net.hollowcube.polar.model.PolarChunk;
 import net.hollowcube.polar.model.PolarSection;
 import net.hollowcube.polar.model.PolarWorld;
 import net.hollowcube.polar.util.PaletteUtil;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
+import net.minestom.server.utils.nbt.BinaryTagReader;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.CompressedProcesser;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTReader;
 
+import java.io.DataInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -139,12 +140,12 @@ public class PolarReader {
         int posIndex = buffer.read(INT);
         String id = buffer.readOptional(STRING);
 
-        NBTCompound nbt = null;
+        CompoundBinaryTag nbt = null;
         if (version <= PolarWorld.VERSION_USERDATA_OPT_BLOCK_ENT_NBT || buffer.read(BOOLEAN)) {
             if (version <= PolarWorld.VERSION_MINESTOM_NBT_READ_BREAK || FORCE_LEGACY_NBT) {
-                nbt = (NBTCompound) legacyReadNBT(buffer);
+                nbt = (CompoundBinaryTag) legacyReadNBT(buffer);
             } else {
-                nbt = (NBTCompound) buffer.read(NBT);
+                nbt = (CompoundBinaryTag) buffer.read(NBT);
             }
         }
 
@@ -180,20 +181,18 @@ public class PolarReader {
      *
      * @see NetworkBuffer#NBT
      */
-    private org.jglrxavpok.hephaistos.nbt.NBT legacyReadNBT(@NotNull NetworkBuffer buffer) {
+    private static BinaryTag legacyReadNBT(@NotNull NetworkBuffer buffer) {
         try {
-            NBTReader nbtReader = new NBTReader(new InputStream() {
-                @Override
+            var nbtReader = new BinaryTagReader(new DataInputStream(new InputStream() {
                 public int read() {
-                    return buffer.read(BYTE) & 0xFF;
+                    return buffer.read(NetworkBuffer.BYTE) & 255;
                 }
-                @Override
+
                 public int available() {
                     return buffer.readableBytes();
                 }
-            }, CompressedProcesser.NONE);
-
-            return nbtReader.read();
+            }));
+            return nbtReader.readNamed().getValue();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

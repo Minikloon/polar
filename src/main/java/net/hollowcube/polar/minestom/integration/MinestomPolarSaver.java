@@ -37,10 +37,10 @@ public class MinestomPolarSaver {
     }
 
     private void updateChunkData(@NotNull Short2ObjectMap<String> blockCache, @NotNull Chunk chunk) {
-        DimensionType dimension = chunk.getInstance().getDimensionType();
+        DimensionType dimension = chunk.getInstance().getCachedDimensionType();
 
         ArrayList<PolarChunk.BlockEntity> blockEntities = new ArrayList<PolarChunk.BlockEntity>();
-        PolarSection[] sections = new PolarSection[dimension.getHeight() / Chunk.CHUNK_SECTION_SIZE];
+        PolarSection[] sections = new PolarSection[dimension.height() / Chunk.CHUNK_SECTION_SIZE];
         assert sections.length == chunk.getSections().size(): "World height mismatch";
 
         byte[][] heightmaps = new byte[32][PolarChunk.HEIGHTMAPS.length];

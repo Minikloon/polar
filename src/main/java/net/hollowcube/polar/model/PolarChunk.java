@@ -1,8 +1,8 @@
 package net.hollowcube.polar.model;
 
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public record PolarChunk(
             int y,
             int z,
             @Nullable String id,
-            @Nullable NBTCompound data
+            @Nullable CompoundBinaryTag data
     ) {
 
     }
