@@ -22,7 +22,7 @@ public class PolarBiomeCache {
 
     public int getBiomeId(@NotNull String name) {
         return biomeReadCache.computeIfAbsent(name, n -> {
-            int biomeId = BIOME_REGISTRY.getId(computeBiome(name).namespace());
+            int biomeId = BIOME_REGISTRY.getId(computeBiome(name).registry().namespace());
             if (biomeId == -1) {
                 logger.error("Failed to find biome: {}", name);
                 biomeId = PLAINS_BIOME_ID;
