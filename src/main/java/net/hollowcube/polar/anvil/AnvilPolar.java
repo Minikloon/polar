@@ -121,7 +121,7 @@ public class AnvilPolar {
 
                 if (!selector.test(chunkX, chunkZ)) continue;
 
-                Chunk chunk = anvilLoader.loadChunk(instance, chunkX, chunkZ).join();
+                Chunk chunk = anvilLoader.loadChunk(instance, chunkX, chunkZ);
                 if (chunk == null) continue;
 
                 chunks.add(chunk);

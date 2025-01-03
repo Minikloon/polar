@@ -35,9 +35,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.Minestom</groupId>
-            <artifactId>Minestom</artifactId>
-            <version>1903e8dff2</version>
+<!--            <groupId>com.github.Minestom</groupId>-->
+<!--            <artifactId>Minestom</artifactId>-->
+<!--            <version>1903e8dff2</version>-->
+            <groupId>net.minestom</groupId>
+            <artifactId>minestom-snapshots</artifactId>
+            <version>dev</version>
         </dependency>
         <dependency>
             <groupId>com.github.luben</groupId>

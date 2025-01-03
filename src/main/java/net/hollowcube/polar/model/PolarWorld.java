@@ -3,7 +3,7 @@ package net.hollowcube.polar.model;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.hollowcube.polar.CompressionType;
-import net.minestom.server.utils.chunk.ChunkUtils;
+import net.minestom.server.coordinate.CoordConversion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +56,7 @@ public class PolarWorld {
         this.maxSection = maxSection;
 
         for (PolarChunk chunk : chunks) {
-            long index = ChunkUtils.getChunkIndex(chunk.x(), chunk.z());
+            long index = CoordConversion.chunkIndex(chunk.x(), chunk.z());
             this.chunks.put(index, chunk);
         }
     }
@@ -83,7 +83,7 @@ public class PolarWorld {
     public @Nullable PolarChunk chunkAt(int x, int z) {
         chunksLock.readLock().lock();
         try {
-            return chunks.getOrDefault(ChunkUtils.getChunkIndex(x, z), null);
+            return chunks.getOrDefault(CoordConversion.chunkIndex(x, z), null);
         } finally {
             chunksLock.readLock().unlock();
         }
@@ -91,7 +91,7 @@ public class PolarWorld {
     public void updateChunkAt(int x, int z, @NotNull PolarChunk chunk) {
         chunksLock.writeLock().lock();
         try {
-            chunks.put(ChunkUtils.getChunkIndex(x, z), chunk);
+            chunks.put(CoordConversion.chunkIndex(x, z), chunk);
         } finally {
             chunksLock.writeLock().unlock();
         }

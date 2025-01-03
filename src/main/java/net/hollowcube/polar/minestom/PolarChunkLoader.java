@@ -50,36 +50,37 @@ public abstract class PolarChunkLoader implements IChunkLoader {
     }
 
     @Override
-    public final @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+    public final @Nullable Chunk loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
         if (loadingWorld == null) {
-            return CompletableFuture.failedFuture(new IllegalStateException("Attempted to load a chunk before loadInstance()!"));
+            throw new IllegalStateException("Attempted to load a chunk before loadInstance()!");
         }
-        return loadingWorld.thenApply(inMemory -> inMemory.getLoader().loadChunk(instance, chunkX, chunkZ));
+        InMemoryPolarWorld inMemory = loadingWorld.join();
+        return inMemory.getLoader().loadChunk(instance, chunkX, chunkZ);
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> saveInstance(@NotNull Instance instance) {
-        return saveChunks(instance.getChunks());
+    public void saveInstance(@NotNull Instance instance) {
+        saveChunks(instance.getChunks());
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> saveChunks(@NotNull Collection<Chunk> chunks) {
+    public void saveChunks(@NotNull Collection<Chunk> chunks) {
         if (loadingWorld == null) {
-            return CompletableFuture.failedFuture(new IllegalStateException("Attempted to save chunks before loadInstance()!"));
+            throw new IllegalStateException("Attempted to save chunks before loadInstance()!");
         }
 
-        return loadingWorld.thenApplyAsync(inMemory -> {
+        InMemoryPolarWorld inMemory = loadingWorld.join();
+        CompletableFuture.runAsync(() -> {
             inMemory.getSaver().writeChunksDataToMemory(chunks);
-            return inMemory;
-        }, this::sync).thenComposeAsync(inMemory -> {
-            byte[] bytes = inMemory.getSaver().saveChunks();
-            return saveWorld(bytes);
-        });
+        }, this::sync).join();
+
+        byte[] bytes = inMemory.getSaver().saveChunks();
+        saveWorld(bytes);
     }
 
     @Override
-    public final @NotNull CompletableFuture<Void> saveChunk(@NotNull Chunk chunk) {
-        return saveChunks(List.of(chunk));
+    public final void saveChunk(@NotNull Chunk chunk) {
+        saveChunks(List.of(chunk));
     }
 
     @Override
@@ -96,5 +97,10 @@ public abstract class PolarChunkLoader implements IChunkLoader {
         } else {
             instance.scheduler().scheduleNextTick(runnable);
         }
+    }
+
+    @Override
+    public boolean supportsParallelSaving() {
+        return true;
     }
 }
